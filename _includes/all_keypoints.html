@@ -1,0 +1,30 @@
+{% comment %}
+  Display key points of all episodes for reference.
+{% endcomment %}
+<h2>Key Points</h2>
+<table class="table table-striped">
+{% for item in site.episode_order %}
+  {% assign url='/'|append:item|append:'/' %}
+  {% for check_episode in site.episodes %}
+    {% if check_episode.url == url %}
+      {% assign episode=check_episode %}
+      {% break %}
+    {% endif %}
+  {% endfor %}
+  
+  {% unless episode.break %}
+    <tr>
+      <td class="col-md-3">
+        <a href="{{ page.root }}{{ episode.url }}">{{ episode.title }}</a>
+      </td>
+      <td class="col-md-9">
+        <ul>
+        {% for keypoint in episode.keypoints %}
+        <li>{{ keypoint|markdownify }}</li>
+        {% endfor %}
+        </ul>
+      </td>
+    </tr>
+  {% endunless %}
+{% endfor %}
+</table>
