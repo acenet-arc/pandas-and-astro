@@ -12,5 +12,5 @@ https://help.github.com/articles/setting-up-your-github-pages-site-locally-with-
 on the webserver then run:
 
 ```bash
-sudo bundle exec jekyll build --destination /var/www/html
+bundle exec jekyll build --destination /var/www/html
 ```
