@@ -74,7 +74,7 @@ def determinPeriodByEye(s,binCenters,plt):
     plt.show()
 def determinPeriodByFFT(s,n,t,plt):
   #TODO: this isn't making sense to me...
-#https://www.ritchievink.com/blog/2017/04/23/understanding-the-fourier-transform-by-example/
+  #https://www.ritchievink.com/blog/2017/04/23/understanding-the-fourier-transform-by-example/
   import numpy as np
   trans=np.fft.fft(s)
   #t=1.0
@@ -125,6 +125,13 @@ def main():
   #by eye methods is very awkward, could probably do just as well by looking at
   #complete time series and measure peak-to-peak distances
   #determinPeriodByEye(s,binCenters,plt)
+  
+  #Since FFT expects sinusoidal signals, subtracting the mean will remove the 
+  #"0 HZ" component
+  #Also noticed a spike at ~2.18675e-10 HZ=>145 years, our data period is 
+  #2018-1874=144 years.. hmmm
+  #finally got a spike at ~2.887e-9 HZ =>11 years
+  s=s-s.mean()
   determinPeriodByFFT(s,numBins,secsInPeriod,plt)
   
 if __name__=="__main__":
