@@ -122,15 +122,16 @@ Noticing that the year is appended to the end of the URL. If we look at successi
 So we could loop over the years 1974 to 2018. Further if we look at the pre-1974 data we see a similar pattern, though with a slightly different URL.
 
 * [http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1872.txt](http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1872.txt)
-* [http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1872.txt](http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1873.txt)
+* [http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1873.txt](http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1873.txt)
+* [http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1874.txt](http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1874.txt)
 * ...
 * [http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1976.txt](http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR1976.txt)
 
-You will notice that they overlap by a couple years, in the case of duplicates I am going to choose from the "newer". So we have two base URLS
+You will notice that they overlap by a couple years, in the case of duplicates I am going to choose from the "newer". Also if you looked at the first two data files in the 1872-1976 data set you will notice they are actually empty, so we will start at 1874. So we have two base URLS
 * <code>http://fenyi.solarobs.csfk.mta.hu/ftp/pub/DPD/data/gDPD</code> over the range of years [1974, 2018]
-* <code>http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR</code> over the range of years [1872, 1973]
+* <code>http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR</code> over the range of years [1874, 1973]
 
-from which we can append a year and a <code>.txt</code> to generate a complete URL we can use to download the data files. Lets put some of this into code:
+from which we can append a year and a <code>.txt</code> to generate a complete URL we can use to download the data files.  Lets put some of this into code:
 
 ~~~
 import urllib
@@ -140,7 +141,7 @@ def main():
   baseURLNew="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/DPD/data/gDPD"
   newYears=range(1974,2019,1)
   baseURLOld="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR"
-  oldYears=range(1872,1974,1)
+  oldYears=range(1874,1974,1)
   
   for year in newYears:
     print(year)
@@ -168,7 +169,7 @@ def main():
   baseURLNew="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/DPD/data/gDPD"
   newYears=range(1974,2019,1)
   baseURLOld="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR"
-  oldYears=range(1872,1974,1)
+  oldYears=range(1874,1974,1)
   
   for year in newYears:
     url=baseURLNew+str(year)+".txt"
@@ -195,7 +196,7 @@ def main():
   baseURLNew="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/DPD/data/gDPD"
   newYears=range(1974,2019,1)
   baseURLOld="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR"
-  oldYears=range(1872,1974,1)
+  oldYears=range(1874,1974,1)
   
   for year in newYears:
     url=baseURLNew+str(year)+".txt"
@@ -275,7 +276,7 @@ def main():
   baseURLNew="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/DPD/data/gDPD"
   newYears=range(1974,2019,1)
   baseURLOld="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR"
-  oldYears=range(1872,1974,1)
+  oldYears=range(1874,1974,1)
   
   downloadDataSet(baseURLOld,oldYears)
   downloadDataSet(baseURLNew,newYears)
@@ -308,7 +309,7 @@ def main():
   baseURLNew="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/DPD/data/gDPD"
   newYears=range(1974,2019,1)
   baseURLOld="http://fenyi.solarobs.csfk.mta.hu/ftp/pub/GPR/data/gGPR"
-  oldYears=range(1872,1974,1)
+  oldYears=range(1874,1974,1)
   
   downloadDataSet(baseURLOld,oldYears)
   downloadDataSet(baseURLNew,newYears)
@@ -393,14 +394,294 @@ A series is a 1D array with axis labels, as paraphrased from [pandas docs on ser
 
 So a dataframe is really a container of series so if we pass in a dataframe what we get back would most likely be a series object.
 
-However our dataframe doesn't just have our date and time columns in it there is also a "lat" column. Previously we have seen how you can select columns of a dataframe by indexing (using the <code>[]</code> operator) into it like
+However our dataframe doesn't just have our date and time columns in it there is also a "lat" column.
+
+> ## non-date/time column names
+> What happens if you pass a dataframe with a non-date/time column name to <code>pandas.to_datetime</code> function?
+{: .challenge}
+
+Previously we have seen how you can select columns of a dataframe by indexing (using the <code>[]</code> operator) into it like
 ~~~
 df['year']
 ~~~
 {: .language-python}
-This returns the <code>'year'</code> column. But it turns out you can actually also index into it using not only a single column name but a list of column names to get multiple columns out.
+This returns the <code>'year'</code> column. But it turns out you can actually also index into it using not only a single column name but a list of column names to get multiple columns out, like so:
 ~~~
 df[['year','month','day','hour','minute','second']]
 ~~~
 {: .language-python}
+we can now pass the above into the <code>pandas.to_datetime()</code> function to get a datetime series out.
+~~~
+import pandas as pd
+
+def main():
+  df=pd.read_fwf("data/sunspot_groups_1974.txt",
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  print(date)
+  
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+~~~
+0      1974-01-02 03:20:30
+1      1974-01-03 00:56:30
+     ...
+1613   1974-12-31 10:51:00
+~~~
+{: .output}
+
+What we really want from our file is a dataframe with a single datetime series and a "lat" series. So we could just create a new dataframe composed of those two series like so:
+~~~
+import pandas as pd
+
+def main():
+  df=pd.read_fwf("data/sunspot_groups_1974.txt",
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  print(df)
+
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+~~~
+                    date        lat
+0    1974-01-02 03:20:30     -14.86
+1    1974-01-03 00:56:30     -15.42
+...
+1589 1974-12-21 11:23:00  999999.00
+...
+1613 1974-12-31 10:51:00       7.46
+~~~
+{: .output}
+
+Ok, but these <code>999999.0</code> values we have been seeing around seem funny, especially for something like latitude. If we take a look at the [text file describing the data format](http://fenyi.solarobs.csfk.mta.hu/ftp/pub/DPD/DPDformat.txt) we see that "999999" represents an intermittent phase of the group, if we plotted that value however our plots will not make any sense, so lets remove any rows with a "lat" of "999999". 
+
+To do this we can use the boolean indexing of a dataframe for example
+~~~
+import pandas as pd
+
+def main():
+  df=pd.read_fwf("data/sunspot_groups_1974.txt",
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  df=df[df.lat!=999999]
+  print(df)
+
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+~~~
+                    date        lat
+0    1974-01-02 03:20:30     -14.86
+1    1974-01-03 00:56:30     -15.42
+...
+1613 1974-12-31 10:51:00       7.46
+~~~
+{: .output}
+
+Ok so now we can read in a data file, combine the date and time columns into a single format that pandas understands and removed data labeled with "999999". Lets pull this bit of code out into a function that we can reuse on all our files. However, we don't want separate dataframes with the data from each file in it, we want one data frame with the data from all the files in it. It turns out that DataFrames have an <code>append</code> function which will append one DataFrame onto the other and return the result. Now we can loop over our files read the data in and append the returned DataFrame onto a single DataFrame containing all the data.
+
+~~~
+import pandas as pd
+
+def readFile(fileName):
+  df=pd.read_fwf(fileName,
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  df=df[df.lat!=999999]
+  return df
+
+def main():
+  
+  #read complete dataset
+  basePath="data/sunspot_groups_"
+  fileName=basePath+"1874.txt"
+  print("reading \""+fileName+"\" ...")
+  dfTotal=readFile(fileName)
+  for year in range(1875,2019,1):
+    fileName=basePath+str(year)+".txt"
+    print("reading \""+fileName+ "\" ...")
+    dfTotal=dfTotal.append(readFile(fileName))
+  
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+~~~
+reading "data/sunspot_groups_1874.txt" ...
+...
+reading "data/sunspot_groups_2018.txt" ...
+~~~
+{: .output}
+
+Now finally lets plot it. Let start by making a butterfly diagram. To do this we will use the matplotlib plot command:
+~~~
+import pandas as pd
+
+def readFile(fileName):
+  df=pd.read_fwf(fileName,
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  df=df[df.lat!=999999]
+  return df
+
+def main():
+  
+  #read complete dataset
+  basePath="data/sunspot_groups_"
+  fileName=basePath+"1874.txt"
+  print("reading \""+fileName+"\" ...")
+  dfTotal=readFile(fileName)
+  for year in range(1875,2019,1):
+    fileName=basePath+str(year)+".txt"
+    print("reading \""+fileName+ "\" ...")
+    dfTotal=dfTotal.append(readFile(fileName))
+  
+  print("plotting a butterfly diagram ...")
+  from matplotlib import pyplot as plt
+  plt.plot(dfTotal["date"],dfTotal["lat"],'.')
+  plt.show()
+  
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+![Butterfly diagram first try](../fig/butterfly_1.png)
+
+What is up with that point at (1685,0)? Lets see if we can track down where that came from. We can use the dataframe boolean indexing again to remove or filter it out, but how to detect what file it came from? If we capture the size of the dataframe before and after the filtering and compare the sizes we can figure this out. 
+~~~
+import pandas as pd
+
+def readFile(fileName):
+  df=pd.read_fwf(fileName,
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  df=df[df.lat!=999999]
+  
+  preShape=df.shape
+  df=df[df.date>pd.to_datetime("01/01/1874")]
+  if preShape!=df.shape:
+    print("removed a row with a date before 01/01/1874")
+  return df
+
+def main():
+  
+  #read complete dataset
+  basePath="data/sunspot_groups_"
+  fileName=basePath+"1874.txt"
+  print("reading \""+fileName+"\" ...")
+  dfTotal=readFile(fileName)
+  for year in range(1875,2019,1):
+    fileName=basePath+str(year)+".txt"
+    print("reading \""+fileName+ "\" ...")
+    dfTotal=dfTotal.append(readFile(fileName))
+  
+  print("plotting a butterfly diagram ...")
+  from matplotlib import pyplot as plt
+  plt.plot(dfTotal["date"],dfTotal["lat"],'.')
+  plt.show()
+  
+if __name__ == "__main__":
+  main()
+
+~~~
+{: .language-python}
+~~~
+reading "data/sunspot_groups_1874.txt" ...
+...
+reading "data/sunspot_groups_1887.txt" ...
+removed a row with a date before 01/01/1874
+...
+reading "data/sunspot_groups_2018.txt" ...
+~~~
+{: .output}
+
+looking at that file we see:
+> g      00 00 00 00 00      0                                 0.00   0.00   0.00   0.00 0.0000
+>
+> g 1887 01 02 04 37 01   1944          13    89    13    90  -8.50 113.60  60.60 262.50 0.8730 0 0
+>
+> g 1887 01 02 04 37 01   1946          36   157    19    84 -16.70  37.60 -15.40 133.50 0.3500 0 0
+>
+
+so the first line in that file is all zeros, we can safely ignore that then, and our plot now makes more sense.
+![Butterfly diagram](../fig/butterfly_2.png)
+
+Well that's pretty cool, and we can see by eye that the period is probably something around 10-15 years. But we can do better, lets work towards doing a Fourier Transform (FT) which converts time series data into frequency space. What we really want to do the FT on sunspot count or in our case on sunspot group count. To get counts of sunspot groups over a period of time we will need to bin our data into some time bins. It turns out that there is a <code>pandas.cut</code> function, which bins values into discrete intervals and you can specify what these intervals or bins are. Since we binning our data based on datetime, then we need to define our bins in that way. We can use the <code>pandas.date_range</code> function to construct a set of datetime bins. So then something like
+~~~
+start="01/01/1874"
+daysInPeriod=20
+periods=(2018-1875)*365.25/daysInPeriod
+freq=str(daysInPeriod)+"D"
+binEdges=pd.date_range(start=start,periods=periods,freq=freq)
+pd.cut(dfTotal["date"],bins=binEdges)
+~~~
+{: .language-python}
+will return the location of the edges of our bins or time intervals that each entry in the <code>dfTotal</code> DataFrame are in. Not quite what we want but getting closer. There is also a method of grouping entries in a dataframe by something, in this case our the bin the belong to which returns a <code>DataFrameGroupBy</code> object, which has a <code>size</code> member function which returns the size of each group (e.g. how many items are a member of the group) which is what we want. Finally, when we get the counts they will be for each bin, but we only have binEdges so we should create a data structure with binCenters in a similar way.
+~~~
+import pandas as pd
+
+def readFile(fileName):
+  df=pd.read_fwf(fileName,
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  df=df[df.lat!=999999]
+  
+  preShape=df.shape
+  df=df[df.date>pd.to_datetime("01/01/1874")]
+  if preShape!=df.shape:
+    print("removed a row with a date before 01/01/1874")
+  return df
+
+def main():
+  
+  #read complete dataset
+  basePath="data/sunspot_groups_"
+  fileName=basePath+"1874.txt"
+  print("reading \""+fileName+"\" ...")
+  dfTotal=readFile(fileName)
+  for year in range(1875,2018,1):
+    fileName=basePath+str(year)+".txt"
+    print("reading \""+fileName+ "\" ...")
+    dfTotal=dfTotal.append(readFile(fileName))
+  
+  print("plotting a butterfly diagram ...")
+  from matplotlib import pyplot as plt
+  plt.plot(dfTotal["date"],dfTotal["lat"],'.')
+  plt.show()
+  
+  #bin sunspot group counts overa  20 day period
+  start="01/01/1874"
+  daysInPeriod=20
+  periods=(2018-1875)*365.25/daysInPeriod
+  freq=str(daysInPeriod)+"D"
+  binEdges=pd.date_range(start=start,periods=periods,freq=freq)
+  start="10/01/1874"
+  binCenters=pd.date_range(start=start,periods=periods-1,freq=freq)
+  s=dfTotal.groupby(pd.cut(dfTotal["date"],bins=binEdges)).size()
+  plt.plot(binCenters,s,'-')
+  plt.show()
+  
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+![Count of sunspots over a 20 day period](../fig/sunspot_group_count.png)
 
