@@ -3,7 +3,7 @@
 #------------------------------------------------------------
 
 # Overall title for pages.
-title: "Introduction to Pandas"
+title: "Data Analysis & Visualization in Python with Pandas"
 
 # Contact email address.
 email: chris.geroux@ace-net.ca
@@ -68,8 +68,9 @@ exclude:
 #Impose an order for your episodes here, items higher in the list will appear 
 #chronologically before items lower on the list
 episode_order:
-  - lunch-1
+  - hubbles-law
   - break
+  - sunspots
   
 # Turn off built-in syntax highlighting.
 highlighter: false
