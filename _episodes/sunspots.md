@@ -667,7 +667,7 @@ def main():
   plt.plot(dfTotal["date"],dfTotal["lat"],'.')
   plt.show()
   
-  #bin sunspot group counts overa  20 day period
+  #bin sunspot group counts over a  20 day period
   start="01/01/1874"
   daysInPeriod=20
   periods=(2018-1875)*365.25/daysInPeriod
@@ -684,4 +684,139 @@ if __name__ == "__main__":
 ~~~
 {: .language-python}
 ![Count of sunspots over a 20 day period](../fig/sunspot_group_count.png)
+
+So now with this we can finally do our FT! It turns out that the python library Numpy has a fast Fourier transform function ([rfft](https://docs.scipy.org/doc/numpy-1.15.0/reference/routines.fft.html)) which computes the Fourier transform on real number inputs (as apposed to complex number inputs) and returns an array of complex values.
+
+> The values in the result follow so-called “standard” order: If A = fft(a, n), then A[0] contains the zero-frequency term (the sum of the signal), which is always purely real for real inputs. Then A[1:n/2] contains the positive-frequency terms, and A[n/2+1:] contains the negative-frequency terms, in order of decreasingly negative frequency. For an even number of input points, A[n/2] represents both positive and negative Nyquist frequency, and is also purely real for real input. For an odd number of input points, A[(n-1)/2] contains the largest positive frequency, while A[(n+1)/2] contains the largest negative frequency. The routine np.fft.fftfreq(n) returns an array giving the frequencies of corresponding elements in the output. The routine np.fft.fftshift(A) shifts transforms and their frequencies to put the zero-frequency components in the middle, and np.fft.ifftshift(A) undoes that shift.
+> When the input a is a time-domain signal and A = fft(a), np.abs(A) is its amplitude spectrum and np.abs(A)**2 is its power spectrum. The phase spectrum is obtained by np.angle(A).
+
+We are interested in the amplitude spectrum which tells us at which frequencies do we have the largest contributions to the periodic signal. The amplitudes returned are at frequencies related to our bin intervals and the number of samples. We can use the function <code>np.fft.rfftfreq</code> to compute the frequencies of the at which the amplitudes returned by the <code>np.rfft</code> function.
+
+~~~
+import pandas as pd
+
+def readFile(fileName):
+  df=pd.read_fwf(fileName,
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  df=df[df.lat!=999999]
+  
+  preShape=df.shape
+  df=df[df.date>pd.to_datetime("01/01/1874")]
+  if preShape!=df.shape:
+    print("removed a row with a date before 01/01/1874")
+  return df
+
+def main():
+  
+  #read complete dataset
+  basePath="data/sunspot_groups_"
+  fileName=basePath+"1874.txt"
+  print("reading \""+fileName+"\" ...")
+  dfTotal=readFile(fileName)
+  for year in range(1875,2018,1):
+    fileName=basePath+str(year)+".txt"
+    print("reading \""+fileName+ "\" ...")
+    dfTotal=dfTotal.append(readFile(fileName))
+  
+  print("plotting a butterfly diagram ...")
+  from matplotlib import pyplot as plt
+  plt.plot(dfTotal["date"],dfTotal["lat"],'.')
+  plt.show()
+  
+  #bin sunspot group counts overa  20 day period
+  print("binning sunspot groups ...")
+  start="01/01/1874"
+  daysInPeriod=20
+  periods=(2018-1875)*365.25/daysInPeriod
+  freq=str(daysInPeriod)+"D"
+  binEdges=pd.date_range(start=start,periods=periods,freq=freq)
+  start="10/01/1874"
+  binCenters=pd.date_range(start=start,periods=periods-1,freq=freq)
+  s=dfTotal.groupby(pd.cut(dfTotal["date"],bins=binEdges)).size()
+  plt.plot(binCenters,s,'-')
+  plt.show()
+  
+  #compute and plot FT
+  import numpy as np
+  trans=np.fft.rfft(s)
+  secondsInPeriod=daysInPeriod*24.0*60.0*60.0
+  plt.plot(np.fft.rfftfreq(s.shape[0],secondsInPeriod),np.abs(trans)**2.0,'-')
+  plt.show()
+  
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+
+![FFT no mean subtraction](../fig/FFT_1.png)
+
+There is a large spike at zero, what is causing that? Remember that an FFT adds a number of amplitudes at different sinusoidal functions to match the data. Sinusoids are centered about the y-axis, with points on both the positive and negative side of the x-axis. If the input signal is all on the positive side, then a constant shift must be applied. This can be achieved by with a cosine function if the argument is always zero. So the way to remove the amplitude at zero is to remove the mean of the dataset.
+~~~
+import pandas as pd
+
+def readFile(fileName):
+  df=pd.read_fwf(fileName,
+    usecols=[1,2,3,4,5,6,12],
+    names=["year","month","day","hour","minute","second","lat"])
+  date=pd.to_datetime(df[["year","month","day","hour","minute","second"]])
+  df=pd.DataFrame({"date":date,"lat":df.lat})
+  df=df[df.lat!=999999]
+  
+  preShape=df.shape
+  df=df[df.date>pd.to_datetime("01/01/1874")]
+  if preShape!=df.shape:
+    print("removed a row with a date before 01/01/1874")
+  return df
+
+def main():
+  
+  #read complete dataset
+  basePath="data/sunspot_groups_"
+  fileName=basePath+"1874.txt"
+  print("reading \""+fileName+"\" ...")
+  dfTotal=readFile(fileName)
+  for year in range(1875,2018,1):
+    fileName=basePath+str(year)+".txt"
+    print("reading \""+fileName+ "\" ...")
+    dfTotal=dfTotal.append(readFile(fileName))
+  
+  print("plotting a butterfly diagram ...")
+  from matplotlib import pyplot as plt
+  plt.plot(dfTotal["date"],dfTotal["lat"],'.')
+  plt.show()
+  
+  #bin sunspot group counts overa  20 day period
+  print("binning sunspot groups ...")
+  start="01/01/1874"
+  daysInPeriod=20
+  periods=(2018-1875)*365.25/daysInPeriod
+  freq=str(daysInPeriod)+"D"
+  binEdges=pd.date_range(start=start,periods=periods,freq=freq)
+  start="10/01/1874"
+  binCenters=pd.date_range(start=start,periods=periods-1,freq=freq)
+  s=dfTotal.groupby(pd.cut(dfTotal["date"],bins=binEdges)).size()
+  plt.plot(binCenters,s,'-')
+  plt.show()
+  
+  #compute and plot FT
+  import numpy as np
+  s=s-s.mean()
+  trans=np.fft.rfft(s)
+  secondsInPeriod=daysInPeriod*24.0*60.0*60.0
+  plt.plot(np.fft.rfftfreq(s.shape[0],secondsInPeriod),np.abs(trans)**2.0,'-')
+  plt.show()
+  
+if __name__ == "__main__":
+  main()
+~~~
+{: .language-python}
+![FFT with mean subtraction](../fig/FFT_2.png)
+
+There are two spikes one at 2.21554e-10 Hz, and 2.887e-9 Hz. If we do the math on these to convert them to years we get, 143 years, and 10.97 years. the second larger spike of 10.97 years is very close to the 11 year solar cycle we were looking for, but what about the 143 year period? How long is our data set baseline? It ranges from 1874 to 2018, so the data set spans 144 years, so this 143 period is oddly close to the length of our dataset, so I think we can fairly safely say that's where it comes from.
+
+
+
 
